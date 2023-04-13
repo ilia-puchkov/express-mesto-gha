@@ -15,4 +15,4 @@ const checkError = (err, res) => {
   return res.status(SERVER_ERROR).send({ message: 'Ошибка сервера' });
 };
 
-module.exports = checkError;
+module.exports = { checkError };
