@@ -1,9 +1,9 @@
-const Card = require("../models/card");
+const Card = require('../models/card');
 const {
   BAD_REQUEST_ERROR,
   NOT_FOUND_ERROR,
   SERVER_ERROR,
-} = require("../utils/errorStatus");
+} = require('../utils/errorStatus');
 
 // Get
 const getAllCards = (req, res) => {
@@ -12,14 +12,12 @@ const getAllCards = (req, res) => {
     .then((cards) => {
       res.send(cards);
     })
-    .catch(() => {
-      return res.status(SERVER_ERROR).send({ message: "Ошибка сервера" });
-    });
+    .catch(() => res.status(SERVER_ERROR).send({ message: 'Ошибка сервера' }));
 };
 
 // Post
 const createCard = (req, res) => {
-  const { _id } = req.user;
+  const { _id } = req.user._id;
   const { name, link } = req.body;
 
   Card.create({ name, link, owner: _id })
@@ -27,12 +25,12 @@ const createCard = (req, res) => {
       res.send(card);
     })
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         return res
           .status(BAD_REQUEST_ERROR)
-          .send({ message: "Переданы некорректные данные" });
+          .send({ message: 'Переданы некорректные данные' });
       }
-      return res.status(SERVER_ERROR).send({ message: "Ошибка сервера" });
+      return res.status(SERVER_ERROR).send({ message: 'Ошибка сервера' });
     });
 };
 
@@ -41,22 +39,20 @@ const deleteCard = (req, res) => {
   const { cardId } = req.params;
 
   Card.findByIdAndRemove(cardId)
-    .then(() => {
-      return res.status(NOT_FOUND_ERROR).send({ message: "Данные не найдены" });
-    })
+    .then(() => res.status(NOT_FOUND_ERROR).send({ message: 'Данные не найдены' }))
     .catch((err) => {
-      if (err.name === "CastError") {
+      if (err.name === 'CastError') {
         return res
           .status(BAD_REQUEST_ERROR)
-          .send({ message: "Переданы некорректные данные" });
+          .send({ message: 'Переданы некорректные данные' });
       }
-      return res.status(SERVER_ERROR).send({ message: "Ошибка сервера" });
+      return res.status(SERVER_ERROR).send({ message: 'Ошибка сервера' });
     });
 };
 
 // Put (like)
 const addCardLike = (req, res) => {
-  const { _id } = req.user;
+  const { _id } = req.user._id;
   const { cardId } = req.params;
 
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: _id } }, { new: true })
@@ -64,21 +60,21 @@ const addCardLike = (req, res) => {
       if (card) {
         return res.send(card);
       }
-      return res.status(NOT_FOUND_ERROR).send({ message: "Данные не найдены" });
+      return res.status(NOT_FOUND_ERROR).send({ message: 'Данные не найдены' });
     })
     .catch((err) => {
-      if (err.name === "CastError") {
+      if (err.name === 'CastError') {
         return res
           .status(BAD_REQUEST_ERROR)
-          .send({ message: "Переданы некорректные данные" });
+          .send({ message: 'Переданы некорректные данные' });
       }
-      return res.status(SERVER_ERROR).send({ message: "Ошибка сервера" });
+      return res.status(SERVER_ERROR).send({ message: 'Ошибка сервера' });
     });
 };
 
 // Delete (like)
 const deleteCardLike = (req, res) => {
-  const { _id } = req.user;
+  const { _id } = req.user._id;
   const { cardId } = req.params;
 
   Card.findByIdAndUpdate(cardId, { $pull: { likes: _id } }, { new: true })
@@ -86,11 +82,9 @@ const deleteCardLike = (req, res) => {
       if (card) {
         return res.send(card);
       }
-      return res.status(NOT_FOUND_ERROR).send({ message: "Данные не найдены" });
+      return res.status(NOT_FOUND_ERROR).send({ message: 'Данные не найдены' });
     })
-    .catch((err) => {
-      return res.status(SERVER_ERROR).send({ message: "Ошибка сервера" });
-    });
+    .catch(() => res.status(SERVER_ERROR).send({ message: 'Ошибка сервера' }));
 };
 
 module.exports = {
