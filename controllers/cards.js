@@ -39,7 +39,12 @@ const deleteCard = (req, res) => {
   const { cardId } = req.params;
 
   Card.findByIdAndRemove(cardId)
-    .then(() => res.status(NOT_FOUND_ERROR).send({ message: 'Данные не найдены' }))
+    .then((card) => {
+      if (card) {
+        return res.send(card);
+      }
+      return res.status(NOT_FOUND_ERROR).send({ message: 'Данные не найдены' });
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
         return res
@@ -52,7 +57,7 @@ const deleteCard = (req, res) => {
 
 // Put (like)
 const addCardLike = (req, res) => {
-  const { _id } = req.user._id;
+  const { _id } = req.user;
   const { cardId } = req.params;
 
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: _id } }, { new: true })
@@ -74,7 +79,7 @@ const addCardLike = (req, res) => {
 
 // Delete (like)
 const deleteCardLike = (req, res) => {
-  const { _id } = req.user._id;
+  const { _id } = req.user;
   const { cardId } = req.params;
 
   Card.findByIdAndUpdate(cardId, { $pull: { likes: _id } }, { new: true })
@@ -84,7 +89,14 @@ const deleteCardLike = (req, res) => {
       }
       return res.status(NOT_FOUND_ERROR).send({ message: 'Данные не найдены' });
     })
-    .catch(() => res.status(SERVER_ERROR).send({ message: 'Ошибка сервера' }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res
+          .status(BAD_REQUEST_ERROR)
+          .send({ message: 'Переданы некорректные данные' });
+      }
+      return res.status(SERVER_ERROR).send({ message: 'Ошибка сервера' });
+    });
 };
 
 module.exports = {
