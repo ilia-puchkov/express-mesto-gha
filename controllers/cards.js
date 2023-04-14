@@ -17,7 +17,7 @@ const getAllCards = (req, res) => {
 
 // Post
 const createCard = (req, res) => {
-  const { _id } = req.user._id;
+  const { _id } = req.user;
   const { name, link } = req.body;
 
   Card.create({ name, link, owner: _id })
