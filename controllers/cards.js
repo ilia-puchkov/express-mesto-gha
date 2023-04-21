@@ -1,9 +1,7 @@
 const Card = require('../models/card');
-const {
-  BAD_REQUEST_ERROR,
-  NOT_FOUND_ERROR,
-  SERVER_ERROR,
-} = require('../utils/errorStatus');
+
+const BadRequestError = require('../errors/BadRequestError');
+const NotFoundError = require('../errors/NotFoundError');
 
 // Get
 const getAllCards = (req, res) => {
@@ -12,7 +10,7 @@ const getAllCards = (req, res) => {
     .then((cards) => {
       res.send(cards);
     })
-    .catch(() => res.status(SERVER_ERROR).send({ message: 'Ошибка сервера' }));
+    .catch(next);
 };
 
 // Post
@@ -26,11 +24,9 @@ const createCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res
-          .status(BAD_REQUEST_ERROR)
-          .send({ message: 'Переданы некорректные данные' });
+        return next(new BadRequestError('Переданы некорректные данные'));
       }
-      return res.status(SERVER_ERROR).send({ message: 'Ошибка сервера' });
+      return next(err);
     });
 };
 
@@ -40,18 +36,16 @@ const deleteCard = (req, res) => {
 
   Card.findByIdAndRemove(cardId)
     .then((card) => {
-      if (card) {
-        return res.send(card);
+      if (!card) {
+        throw new NotFoundError('Данные не найдены');
       }
-      return res.status(NOT_FOUND_ERROR).send({ message: 'Данные не найдены' });
+      return res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res
-          .status(BAD_REQUEST_ERROR)
-          .send({ message: 'Переданы некорректные данные' });
-      }
-      return res.status(SERVER_ERROR).send({ message: 'Ошибка сервера' });
+          return next(new BadRequestError('Переданы некорректные данные'));
+        }
+        return next(err);
     });
 };
 
@@ -62,18 +56,16 @@ const addCardLike = (req, res) => {
 
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: _id } }, { new: true })
     .then((card) => {
-      if (card) {
-        return res.send(card);
+      if (!card) {
+        throw new NotFoundError('Данные не найдены');
       }
-      return res.status(NOT_FOUND_ERROR).send({ message: 'Данные не найдены' });
+      return res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res
-          .status(BAD_REQUEST_ERROR)
-          .send({ message: 'Переданы некорректные данные' });
-      }
-      return res.status(SERVER_ERROR).send({ message: 'Ошибка сервера' });
+          return next(new BadRequestError('Переданы некорректные данные'));
+        }
+        return next(err);
     });
 };
 
@@ -84,18 +76,16 @@ const deleteCardLike = (req, res) => {
 
   Card.findByIdAndUpdate(cardId, { $pull: { likes: _id } }, { new: true })
     .then((card) => {
-      if (card) {
-        return res.send(card);
+      if (!card) {
+        throw new NotFoundError('Данные не найдены');
       }
-      return res.status(NOT_FOUND_ERROR).send({ message: 'Данные не найдены' });
+      return res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res
-          .status(BAD_REQUEST_ERROR)
-          .send({ message: 'Переданы некорректные данные' });
-      }
-      return res.status(SERVER_ERROR).send({ message: 'Ошибка сервера' });
+          return next(new BadRequestError('Переданы некорректные данные'));
+        }
+        return next(err);
     });
 };
 

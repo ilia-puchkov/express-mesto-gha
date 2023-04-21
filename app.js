@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const router = require('./routes');
+const { createUser, login } = require('./controllers/users');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -10,7 +11,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
-
+/*
 app.use((req, res, next) => {
   req.user = {
     _id: '5d8b8592978f8bd833ca8133',
@@ -18,8 +19,10 @@ app.use((req, res, next) => {
 
   next();
 });
-
+*/
 app.use(router);
+app.post('/signin', login);
+app.post('/signup', createUser);
 
 app.listen(PORT, () => {
   console.log(`server on port ${PORT}`);

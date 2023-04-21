@@ -1,9 +1,8 @@
 const User = require('../models/user');
-const {
-  BAD_REQUEST_ERROR,
-  NOT_FOUND_ERROR,
-  SERVER_ERROR,
-} = require('../utils/errorStatus');
+const bcrypt = require('bcryptjs');
+
+const BadRequestError = require('../errors/BadRequestError');
+const NotFoundError = require('../errors/NotFoundError');
 
 // GET
 const getAllUsers = (req, res) => {
@@ -11,7 +10,7 @@ const getAllUsers = (req, res) => {
     .then((users) => {
       res.send(users);
     })
-    .catch(() => res.status(SERVER_ERROR).send({ message: 'Ошибка сервера' }));
+    .catch(next);
 };
 
 // GET (by id)
@@ -20,37 +19,48 @@ const getUserById = (req, res) => {
 
   User.findById(userId)
     .then((user) => {
-      if (user) {
-        return res.send(user);
+      if (!user) {
+        throw new NotFoundError('Данные не найдены');
       }
-      return res.status(NOT_FOUND_ERROR).send({ message: 'Данные не найдены' });
+      return res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res
-          .status(BAD_REQUEST_ERROR)
-          .send({ message: 'Переданы некорректные данные' });
+        return next(new BadRequestError('Переданы некорректные данные'));
       }
-      return res.status(SERVER_ERROR).send({ message: 'Ошибка сервера' });
+      return next(err);
     });
 };
 
 // POST
 const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+  const { name, about, avatar, email, password } = req.body;
 
-  User.create({ name, about, avatar })
+  bcrypt
+    .hash(password, 10)
+    .then((hash) => User.create({ name, about, avatar, email, password: hash }))
     .then((user) => {
       res.send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res
-          .status(BAD_REQUEST_ERROR)
-          .send({ message: 'Переданы некорректные данные' });
+        return next(new BadRequestError('Переданы некорректные данные'));
       }
-      return res.status(SERVER_ERROR).send({ message: 'Ошибка сервера' });
+      return next(err);
     });
+};
+
+//POST
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'super-strong-secret', {expiresIn: '7d'});
+
+      res.send({ token });
+    })
+    .catch(next);
 };
 
 // Patch (user)
@@ -61,18 +71,16 @@ const updateUserProfile = (req, res) => {
   User.findByIdAndUpdate(
     _id,
     { name, about },
-    { new: true, runValidators: true },
+    { new: true, runValidators: true }
   )
     .then((user) => {
       if (user) res.send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res
-          .status(BAD_REQUEST_ERROR)
-          .send({ message: 'Переданы некорректные данные' });
+        return next(new BadRequestError('Переданы некорректные данные'));
       }
-      return res.status(SERVER_ERROR).send({ message: 'Ошибка сервера' });
+      return next(err);
     });
 };
 
@@ -87,11 +95,9 @@ const updateUserAvatar = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res
-          .status(BAD_REQUEST_ERROR)
-          .send({ message: 'Переданы некорректные данные' });
+        return next(new BadRequestError('Переданы некорректные данные'));
       }
-      return res.status(SERVER_ERROR).send({ message: 'Ошибка сервера' });
+      return next(err);
     });
 };
 
@@ -99,6 +105,7 @@ module.exports = {
   getAllUsers,
   getUserById,
   createUser,
+  login,
   updateUserProfile,
   updateUserAvatar,
 };
