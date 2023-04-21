@@ -1,20 +1,21 @@
 const Card = require('../models/card');
 
 const BadRequestError = require('../errors/BadRequestError');
+const ForbiddenError = require('../errors/ForbiddenError');
 const NotFoundError = require('../errors/NotFoundError');
 
 // Get
-const getAllCards = (req, res) => {
+const getAllCards = (req, res, next) => {
   Card.find({})
     // .populate('owner')
     .then((cards) => {
       res.send(cards);
     })
-    .catch(next);
+    .catch(err => next(err)); 
 };
 
 // Post
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { _id } = req.user;
   const { name, link } = req.body;
 
@@ -31,26 +32,30 @@ const createCard = (req, res) => {
 };
 
 // Delete
-const deleteCard = (req, res) => {
+const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
 
   Card.findByIdAndRemove(cardId)
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Данные не найдены');
+        throw new NotFoundError('Карточки уже нет?');
       }
-      return res.send(card);
+      if (card.owner.toString() !== req.user._id) {
+        throw new ForbiddenError('Доступ к чужому запрещен');
+      } else {
+        return res.send(card);
+      }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-          return next(new BadRequestError('Переданы некорректные данные'));
+        return next(new BadRequestError('Переданы некорректные данные'));
         }
         return next(err);
     });
 };
 
 // Put (like)
-const addCardLike = (req, res) => {
+const addCardLike = (req, res, next) => {
   const { _id } = req.user;
   const { cardId } = req.params;
 
@@ -63,14 +68,14 @@ const addCardLike = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-          return next(new BadRequestError('Переданы некорректные данные'));
+        return next(new BadRequestError('Переданы некорректные данные'));
         }
         return next(err);
     });
 };
 
 // Delete (like)
-const deleteCardLike = (req, res) => {
+const deleteCardLike = (req, res, next) => {
   const { _id } = req.user;
   const { cardId } = req.params;
 
@@ -83,7 +88,7 @@ const deleteCardLike = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-          return next(new BadRequestError('Переданы некорректные данные'));
+        return next(new BadRequestError('Переданы некорректные данные'));
         }
         return next(err);
     });

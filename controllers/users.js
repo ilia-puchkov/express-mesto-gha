@@ -1,20 +1,23 @@
-const User = require('../models/user');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const User = require('../models/user');
 
+const AuthorisationError = require('../errors/AuthorisationError');
 const BadRequestError = require('../errors/BadRequestError');
+const ConflictError = require('../errors/ConflictError');
 const NotFoundError = require('../errors/NotFoundError');
 
 // GET
-const getAllUsers = (req, res) => {
+const getAllUsers = (req, res, next) => {
   User.find({})
     .then((users) => {
       res.send(users);
     })
-    .catch(next);
+    .catch((err) => next(err));
 };
 
 // GET (by id)
-const getUserById = (req, res) => {
+const getUserById = (req, res, next) => {
   const { userId } = req.params;
 
   User.findById(userId)
@@ -32,8 +35,25 @@ const getUserById = (req, res) => {
     });
 };
 
+// GET (currentUser)
+const getCurrentUser = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Данные не найдены');
+      }
+      return res.send(user);
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return next(new BadRequestError('Переданы некорректные данные'));
+      }
+      return next(err);
+    });
+};
+
 // POST
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, about, avatar, email, password } = req.body;
 
   bcrypt
@@ -46,25 +66,38 @@ const createUser = (req, res) => {
       if (err.name === 'ValidationError') {
         return next(new BadRequestError('Переданы некорректные данные'));
       }
+      if (err.code === 11000) {
+        return next(
+          new ConflictError('Пользователь с подобными данными уже существует')
+        );
+      }
       return next(err);
     });
 };
 
-//POST
-const login = (req, res) => {
+// POST
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
-  return User.findUserByCredentials(email, password)
+  User.findOne({ email })
+    .select('+password')
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'super-strong-secret', {expiresIn: '7d'});
+      if(!user) {
+        throw new AuthorisationError('Неверная почта или пароль');
+      }
+    })
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'super-strong-secret', {
+        expiresIn: '7d',
+      });
 
       res.send({ token });
     })
-    .catch(next);
+    .catch((err) => next(err));
 };
 
 // Patch (user)
-const updateUserProfile = (req, res) => {
+const updateUserProfile = (req, res, next) => {
   const { _id } = req.user;
   const { name, about } = req.body;
 
@@ -85,7 +118,7 @@ const updateUserProfile = (req, res) => {
 };
 
 // Patch (avatar)
-const updateUserAvatar = (req, res) => {
+const updateUserAvatar = (req, res, next) => {
   const { _id } = req.user;
   const { avatar } = req.body;
 
@@ -104,6 +137,7 @@ const updateUserAvatar = (req, res) => {
 module.exports = {
   getAllUsers,
   getUserById,
+  getCurrentUser,
   createUser,
   login,
   updateUserProfile,
