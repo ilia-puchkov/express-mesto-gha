@@ -13,7 +13,7 @@ const getAllUsers = (req, res, next) => {
     .then((users) => {
       res.send(users);
     })
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 // GET (by id)
@@ -68,7 +68,7 @@ const createUser = (req, res, next) => {
       }
       if (err.code === 11000) {
         return next(
-          new ConflictError('Пользователь с подобными данными уже существует')
+          new ConflictError('Пользователь с подобными данными уже существует'),
         );
       }
       return next(err);
@@ -82,7 +82,7 @@ const login = (req, res, next) => {
   User.findOne({ email })
     .select('+password')
     .then((user) => {
-      if(!user) {
+      if (!user) {
         throw new AuthorisationError('Неверная почта или пароль');
       }
     })
@@ -93,7 +93,7 @@ const login = (req, res, next) => {
 
       res.send({ token });
     })
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 // Patch (user)
@@ -104,7 +104,7 @@ const updateUserProfile = (req, res, next) => {
   User.findByIdAndUpdate(
     _id,
     { name, about },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   )
     .then((user) => {
       if (user) res.send(user);

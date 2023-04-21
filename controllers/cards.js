@@ -11,7 +11,7 @@ const getAllCards = (req, res, next) => {
     .then((cards) => {
       res.send(cards);
     })
-    .catch(err => next(err)); 
+    .catch(next);
 };
 
 // Post
@@ -49,8 +49,8 @@ const deleteCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         return next(new BadRequestError('Переданы некорректные данные'));
-        }
-        return next(err);
+      }
+      return next(err);
     });
 };
 
@@ -69,8 +69,8 @@ const addCardLike = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         return next(new BadRequestError('Переданы некорректные данные'));
-        }
-        return next(err);
+      }
+      return next(err);
     });
 };
 
@@ -89,8 +89,8 @@ const deleteCardLike = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         return next(new BadRequestError('Переданы некорректные данные'));
-        }
-        return next(err);
+      }
+      return next(err);
     });
 };
 
