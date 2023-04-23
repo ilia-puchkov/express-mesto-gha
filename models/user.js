@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 
 const regexUrl = require('../utils/regexUrl');
 
-const AuthorisationError = require('../errors/UnauthorizedError');
+const AuthorisationError = require('../errors/AuthorisationError');
 
 const userSchema = mongoose.Schema({
   email: {
