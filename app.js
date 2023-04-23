@@ -1,7 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
-const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
 const router = require('./routes');
 
@@ -14,10 +13,11 @@ const { PORT = 3000 } = process.env;
 const app = express();
 
 app.use(helmet);
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
 
-mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
+mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
+  useUnifiedTopology: true,
+});
 
 app.use(router);
 app.post('/signin', validateAuth, login);
