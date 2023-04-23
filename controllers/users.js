@@ -34,6 +34,25 @@ const getUserById = (req, res, next) => {
     });
 };
 
+// GET (currentUser)
+const getCurrentUser = (req, res, next) => {
+  const { userId } = req.params;
+
+  User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Данные не найдены');
+      }
+      return res.status(200).send(user);
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return next(new BadRequestError('Переданы некорректные данные'));
+      }
+      return next(err);
+    });
+};
+
 // POST
 const createUser = (req, res, next) => {
   const {
@@ -127,6 +146,7 @@ const updateUserAvatar = (req, res, next) => {
 module.exports = {
   getAllUsers,
   getUserById,
+  getCurrentUser,
   createUser,
   login,
   updateUserProfile,
