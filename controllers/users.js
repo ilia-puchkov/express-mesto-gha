@@ -1,4 +1,4 @@
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
@@ -54,11 +54,23 @@ const getCurrentUser = (req, res, next) => {
 
 // POST
 const createUser = (req, res, next) => {
-  const { name, about, avatar, email, password } = req.body;
+  const {
+    name,
+    about,
+    avatar,
+    email,
+    password,
+  } = req.body;
 
   bcrypt
     .hash(password, 10)
-    .then((hash) => User.create({ name, about, avatar, email, password: hash }))
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    }))
     .then((user) => {
       res.send(user);
     })
@@ -77,7 +89,7 @@ const createUser = (req, res, next) => {
 
 // POST
 const login = (req, res, next) => {
-  const { email, password } = req.body;
+  const { email /* password */ } = req.body;
 
   User.findOne({ email })
     .select('+password')
