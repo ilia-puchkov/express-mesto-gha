@@ -16,6 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
+app.use(router);
 app.use(errors());
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
@@ -27,7 +28,6 @@ app.use((err, req, res, next) => {
   next();
 });
 
-app.use(router);
 app.use(auth);
 app.use(helmet);
 
