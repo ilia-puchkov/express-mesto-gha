@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
 const router = require('./routes');
@@ -28,6 +29,7 @@ app.use((err, req, res, next) => {
 
 app.use(router);
 app.use(auth);
+app.use(helmet);
 
 app.post('/signin', validateAuth, login);
 app.post('/signup', validateRegistration, createUser);

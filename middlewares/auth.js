@@ -4,6 +4,7 @@ const AuthorisationError = require('../errors/AuthorisationError');
 
 const extractBearerToken = (header) => header.replace('Bearer ', '');
 
+// eslint-disable-next-line consistent-return
 const auth = (req, res, next) => {
   const { authorization } = req.headers;
 
@@ -22,7 +23,7 @@ const auth = (req, res, next) => {
 
   req.user = payload; // записываем пейлоуд в объект запроса
 
-  return next(); // пропускаем запрос дальше
+  next(); // пропускаем запрос дальше
 };
 
 module.exports = { auth };
