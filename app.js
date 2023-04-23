@@ -35,5 +35,6 @@ app.post('/signin', validateAuth, login);
 app.post('/signup', validateRegistration, createUser);
 
 app.listen(PORT, () => {
+// eslint-disable-next-line no-console
   console.log(`server on port ${PORT}`);
 });
