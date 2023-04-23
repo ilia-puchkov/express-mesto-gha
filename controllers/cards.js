@@ -7,7 +7,6 @@ const NotFoundError = require('../errors/NotFoundError');
 // Get
 const getAllCards = (req, res, next) => {
   Card.find({})
-    // .populate('owner')
     .then((cards) => {
       res.send(cards);
     })
@@ -16,10 +15,9 @@ const getAllCards = (req, res, next) => {
 
 // Post
 const createCard = (req, res, next) => {
-  const { _id } = req.user;
   const { name, link } = req.body;
 
-  Card.create({ name, link, owner: _id })
+  Card.create({ name, link, owner: req.user._id })
     .then((card) => {
       res.send(card);
     })
@@ -56,15 +54,14 @@ const deleteCard = (req, res, next) => {
 
 // Put (like)
 const addCardLike = (req, res, next) => {
-  const { _id } = req.user;
   const { cardId } = req.params;
 
-  Card.findByIdAndUpdate(cardId, { $addToSet: { likes: _id } }, { new: true })
+  Card.findByIdAndUpdate(cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Данные не найдены');
       }
-      return res.send(card);
+      return res.status(201).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -76,10 +73,9 @@ const addCardLike = (req, res, next) => {
 
 // Delete (like)
 const deleteCardLike = (req, res, next) => {
-  const { _id } = req.user;
   const { cardId } = req.params;
 
-  Card.findByIdAndUpdate(cardId, { $pull: { likes: _id } }, { new: true })
+  Card.findByIdAndUpdate(cardId, { $pull: { likes: req.user_id } }, { new: true })
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Данные не найдены');
