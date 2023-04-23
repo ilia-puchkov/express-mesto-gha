@@ -12,6 +12,8 @@ const { validateAuth, validateRegistration } = require('./middlewares/validation
 const { PORT = 3000 } = process.env;
 const app = express();
 
+app.use(helmet);
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -21,6 +23,7 @@ app.use(router);
 app.post('/signin', validateAuth, login);
 app.post('/signup', validateRegistration, createUser);
 
+app.use(auth);
 app.use(errors());
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
@@ -31,8 +34,6 @@ app.use((err, req, res, next) => {
   });
   next();
 });
-app.use(auth);
-app.use(helmet);
 
 app.listen(PORT, () => {
 // eslint-disable-next-line no-console
