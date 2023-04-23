@@ -25,6 +25,7 @@ app.post('/signup', validateRegistration, createUser);
 
 app.use(auth);
 app.use(errors());
+/*
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
   res.status(statusCode).send({
@@ -33,7 +34,7 @@ app.use((err, req, res, next) => {
       : message,
   });
   next();
-});
+}); */
 
 app.listen(PORT, () => {
 // eslint-disable-next-line no-console
