@@ -40,7 +40,7 @@ const deleteCard = (req, res, next) => {
       if (card.owner.toString() !== req.user._id) {
         throw new ForbiddenError('Доступ к чужому запрещен');
       }
-      Card.deleteOne()
+      card.deleteOne()
         .then(() => {
           res.send(card);
         })
