@@ -61,20 +61,18 @@ const createUser = (req, res, next) => {
     about,
     avatar,
     email,
-    password
+    password,
   } = req.body;
 
   bcrypt
     .hash(password, 10)
-    .then((hash) =>
-      User.create({
+    .then((hash) => User.create({
         name,
         about,
         avatar,
         email,
         password: hash,
-      })
-    )
+      }),)
     .then(() => {
       res.status(201).send({
         name, about, avatar, email,
@@ -85,7 +83,7 @@ const createUser = (req, res, next) => {
         next(new BadRequestError('Переданы некорректные данные'));
       } else if (err.code === 11000) {
         next(
-          new ConflictError('Пользователь с подобными данными уже существует')
+          new ConflictError('Пользователь с подобными данными уже существует'),
         );
       } else {
         next(err);
@@ -115,7 +113,7 @@ const updateUserProfile = (req, res, next) => {
   User.findByIdAndUpdate(
     req.user._id,
     { name, about },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   )
     .then((user) => {
       if (!user) {
@@ -139,7 +137,7 @@ const updateUserAvatar = (req, res, next) => {
   User.findByIdAndUpdate(
     req.user._id,
     { avatar },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   )
     .then((user) => {
       if (user) res.status(200).send(user);
