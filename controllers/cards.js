@@ -24,31 +24,34 @@ const createCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
 // Delete
 const deleteCard = (req, res, next) => {
-  const { cardId } = req.params;
-
-  Card.findByIdAndRemove(cardId)
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Карточки уже нет?');
       }
       if (card.owner.toString() !== req.user._id) {
         throw new ForbiddenError('Доступ к чужому запрещен');
-      } else {
-        return res.send(card);
       }
+      Card.deleteOne()
+        .then(() => {
+          res.send(card);
+        })
+        .catch(next);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Переданы некорректные данные'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -56,7 +59,11 @@ const deleteCard = (req, res, next) => {
 const addCardLike = (req, res, next) => {
   const { cardId } = req.params;
 
-  Card.findByIdAndUpdate(cardId, { $addToSet: { likes: req.user._id } }, { new: true })
+  Card.findByIdAndUpdate(
+    cardId,
+    { $addToSet: { likes: req.user._id } },
+    { new: true }
+  )
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Данные не найдены');
@@ -66,8 +73,9 @@ const addCardLike = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Переданы некорректные данные'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -75,7 +83,11 @@ const addCardLike = (req, res, next) => {
 const deleteCardLike = (req, res, next) => {
   const { cardId } = req.params;
 
-  Card.findByIdAndUpdate(cardId, { $pull: { likes: req.user_id } }, { new: true })
+  Card.findByIdAndUpdate(
+    cardId,
+    { $pull: { likes: req.user._id } },
+    { new: true }
+  )
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Данные не найдены');
@@ -85,8 +97,9 @@ const deleteCardLike = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Переданы некорректные данные'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 

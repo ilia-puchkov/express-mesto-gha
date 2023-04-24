@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcrypt');
 
-const regexUrl = require('../utils/regexUrl');
+const { regexUrl } = require('../utils/regexUrl');
 
 const AuthorisationError = require('../errors/AuthorisationError');
 
@@ -20,7 +20,6 @@ const userSchema = mongoose.Schema({
     type: String,
     required: true,
     select: false,
-    minlength: 8,
   },
   name: {
     type: String,
