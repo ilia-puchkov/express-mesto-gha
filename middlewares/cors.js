@@ -1,6 +1,6 @@
 const allowedCors = [
-  'http://rerasmesto.students.nomoredomains.monster/',
-  'https://rerasmesto.students.nomoredomains.monster/',
+  'http://rerasmesto.students.nomoredomains.monster',
+  'https://rerasmesto.students.nomoredomains.monster',
   'http://api.rerasmesto.students.nomoredomains.monster',
   'https://api.rerasmesto.students.nomoredomains.monster',
   'http://localhost:3000',
@@ -14,6 +14,8 @@ module.exports = (req, res, next) => {
 
   const requestHeaders = req.headers['access-control-request-headers'];
   const DEFAULT_ALLOWED_METHODS = 'GET,HEAD,PUT,PATCH,POST,DELETE';
+
+  res.header('Access-Control-Allow-Credentials', true);
 
   if (allowedCors.includes(origin)) {
     res.header('Access-Control-Allow-Origin', origin);
