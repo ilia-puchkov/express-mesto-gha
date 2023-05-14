@@ -9,8 +9,8 @@ const cardRouter = require('./cards');
 
 const NotFoundError = require('../errors/NotFoundError');
 
-router.post('/signin', validateAuth, login);
-router.post('/signup', validateRegistration, createUser);
+router.post('/sign-in', validateAuth, login);
+router.post('/sign-up', validateRegistration, createUser);
 
 router.use(auth);
 router.use('/users', userRouter);
