@@ -6,7 +6,7 @@ const { regexUrl } = require('../utils/regexUrl');
 
 const AuthorisationError = require('../errors/AuthorisationError');
 
-const userSchema = mongoose.Schema({
+const userSchema = new mongoose.Schema({
   email: {
     type: String,
     unique: true,
