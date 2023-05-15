@@ -1,5 +1,4 @@
-require('dotenv').config();
-
+/* eslint-disable linebreak-style */
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 

@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 const userRouter = require('express').Router();
 
 const {

@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 class AuthorisationError extends Error {
   constructor(message) {
     super();
